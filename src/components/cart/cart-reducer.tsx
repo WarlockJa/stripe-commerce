@@ -43,7 +43,10 @@ export type CartAction =
 export default function cartReducer(items: CartItem[], action: CartAction) {
   switch (action.type) {
     case "addNewCartItem": {
-      if (items.find((item) => item.itemId === action.item.itemId)) {
+      const isItemInCart = !!items.find(
+        (item) => item.itemId === action.item.itemId
+      );
+      if (isItemInCart) {
         const newItems = items.map((item) =>
           item.itemId === action.item.itemId
             ? { ...item, quantity: item.quantity++ }
