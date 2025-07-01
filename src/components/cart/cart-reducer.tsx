@@ -70,7 +70,7 @@ export default function cartReducer(items: CartItem[], action: CartAction) {
     case "incQuantCartItem":
       return items.map((item) =>
         item.itemId === action.item.itemId
-          ? { ...item, quantity: item.quantity++ }
+          ? { ...item, quantity: item.quantity + 1 }
           : item
       );
 
@@ -79,7 +79,7 @@ export default function cartReducer(items: CartItem[], action: CartAction) {
         item.itemId === action.item.itemId
           ? {
               ...item,
-              quantity: item.quantity > 1 ? item.quantity-- : item.quantity,
+              quantity: item.quantity > 1 ? item.quantity - 1 : item.quantity,
             }
           : item
       );
