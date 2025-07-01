@@ -41,6 +41,8 @@ export type CartAction =
   | CartActionClear;
 
 export default function cartReducer(items: CartItem[], action: CartAction) {
+  let theItem: CartItem | undefined;
+
   switch (action.type) {
     case "addNewCartItem":
       if (items.find((item) => item.itemId === action.item.itemId)) {
@@ -68,6 +70,8 @@ export default function cartReducer(items: CartItem[], action: CartAction) {
       return [...items, newItem];
 
     case "incQuantCartItem":
+      theItem = items.find((item) => item.itemId === action.item.itemId);
+      console.log("TEST: ", theItem ? theItem.quantity + 1 : "fail");
       return items.map((item) =>
         item.itemId === action.item.itemId
           ? { ...item, quantity: item.quantity + 1 }
@@ -75,6 +79,11 @@ export default function cartReducer(items: CartItem[], action: CartAction) {
       );
 
     case "decQuantCartItem":
+      theItem = items.find((item) => item.itemId === action.item.itemId);
+      console.log(
+        "TEST: ",
+        theItem ? (theItem.quantity > 1 ? theItem.quantity - 1 : 1) : "fail"
+      );
       return items.map((item) =>
         item.itemId === action.item.itemId
           ? {
