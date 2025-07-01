@@ -41,16 +41,15 @@ export type CartAction =
   | CartActionClear;
 
 export default function cartReducer(items: CartItem[], action: CartAction) {
-  let theItem: CartItem | undefined;
-
   switch (action.type) {
-    case "addNewCartItem":
+    case "addNewCartItem": {
       if (items.find((item) => item.itemId === action.item.itemId)) {
-        return items.map((item) =>
+        const newItems = items.map((item) =>
           item.itemId === action.item.itemId
             ? { ...item, quantity: item.quantity++ }
             : item
         );
+        return newItems;
       }
 
       const storeItem = ITEMS.find(
@@ -68,23 +67,19 @@ export default function cartReducer(items: CartItem[], action: CartAction) {
         image: storeItem.image,
       };
       return [...items, newItem];
+    }
 
-    case "incQuantCartItem":
-      theItem = items.find((item) => item.itemId === action.item.itemId);
-      console.log("TEST: ", theItem ? theItem.quantity + 1 : "fail");
-      return items.map((item) =>
+    case "incQuantCartItem": {
+      const newItems = items.map((item) =>
         item.itemId === action.item.itemId
           ? { ...item, quantity: item.quantity + 1 }
           : item
       );
+      return newItems;
+    }
 
-    case "decQuantCartItem":
-      theItem = items.find((item) => item.itemId === action.item.itemId);
-      console.log(
-        "TEST: ",
-        theItem ? (theItem.quantity > 1 ? theItem.quantity - 1 : 1) : "fail"
-      );
-      return items.map((item) =>
+    case "decQuantCartItem": {
+      const newItems = items.map((item) =>
         item.itemId === action.item.itemId
           ? {
               ...item,
@@ -92,6 +87,9 @@ export default function cartReducer(items: CartItem[], action: CartAction) {
             }
           : item
       );
+
+      return newItems;
+    }
 
     case "deleteCartItem":
       return items.filter((item) => item.itemId !== action.item.itemId);
