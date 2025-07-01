@@ -1,0 +1,8 @@
+    install stripe deps
+npm i stripe @stripe/react-stripe-js @stripe/stripe-js
+
+    get dev keys from stripe
+https://dashboard.stripe.com/test/apikeys
+
+    stripe page
+wrap payment elements inside Elements component
