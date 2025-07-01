@@ -2,22 +2,7 @@
 
 import { getStripe } from "@/lib/stripe";
 import { createServerAction } from "zsa";
-
-// Action types
-// type GetTransactionsInput = {
-//   page: number;
-//   limit?: number;
-// };
-
-// type CreatePaymentIntentInput = {
-//   packageId: string;
-// };
-// type CreatePaymentIntentInput = CartItem[];
-
-// type PurchaseCreditsInput = {
-//   packageId: string;
-//   paymentIntentId: string;
-// };
+import { createCheckoutSchema } from "./stripe-payment-schemas";
 
 // export async function getTransactions({ page, limit = MAX_TRANSACTIONS_PER_PAGE }: GetTransactionsInput) {
 //   return withRateLimit(async () => {
@@ -56,28 +41,78 @@ import { createServerAction } from "zsa";
 //   }, RATE_LIMITS.PURCHASE);
 // }
 
-export const createCheckoutAction = createServerAction().handler(async () => {
-  console.log("TEST");
-  const session = await getStripe().checkout.sessions.create({
-    // amount: creditPackage.price * 100,
-    // currency: 'usd',
-    // automatic_payment_methods: {
-    //   enabled: true,
-    //   allow_redirects: 'never',
-    // },
-    payment_method_types: ["card"],
-    adaptive_pricing: { enabled: true },
-    success_url: `${process.env.CLIENT_URL}/payment-success`,
-    cancel_url: process.env.CLIENT_URL,
-    metadata: {
-      userId: "test_user_id",
-    },
-  });
+export const createPriceAction = createServerAction().handler(async () => {
+  const [priceFlowers, priceCar] = await Promise.all([
+    getStripe().prices.create({
+      currency: "usd",
+      unit_amount: 3000,
+      product_data: {
+        name: "flowers",
+      },
+    }),
+    getStripe().prices.create({
+      currency: "usd",
+      unit_amount: 2300000,
+      product_data: {
+        name: "car",
+      },
+    }),
+  ]);
 
-  console.log("SESS: ", session);
+  console.log("PRICE FLOWER: ", priceFlowers, "PRICE CAR: ", priceCar);
 
-  return session.url;
+  return { ok: true };
 });
+
+export const listPricesAction = createServerAction().handler(async () => {
+  const prices = await getStripe().prices.list();
+
+  console.log("PRICES: ", prices);
+
+  return { ok: true };
+});
+
+// prices created via createPriceAction
+// in prod should be stored in DB
+// and probably associated with products also created using stripe API
+const stripePrices = {
+  flowers: "price_1Rg4dfDu7pxDmF35jObpU0TV",
+  car: "price_1Rg4dfDu7pxDmF35BaJ2AAGp",
+};
+
+export const createCheckoutAction = createServerAction()
+  .input(createCheckoutSchema)
+  .handler(async ({ input }) => {
+    // console.log("TEST: ", input);
+    const amount =
+      input.reduce((sum, cur) => (sum += cur.priceCent * cur.quantity), 0) /
+      100;
+    const line_items: { price: string; quantity: number }[] = input.map(
+      (item) => ({ price: stripePrices[item.name], quantity: item.quantity })
+    );
+    const session = await getStripe().checkout.sessions.create({
+      // amount: creditPackage.price * 100,
+      // currency: 'usd',
+      // automatic_payment_methods: {
+      //   enabled: true,
+      //   allow_redirects: 'never',
+      // },
+      // payment_method_types: ["card"],
+      mode: "payment",
+      // adaptive_pricing: { enabled: true },
+      success_url: `${process.env.CLIENT_URL}/payment-success?amount=${amount}`,
+      cancel_url: process.env.CLIENT_URL,
+      line_items,
+      metadata: {
+        userId: "test_user_id",
+      },
+    });
+
+    // console.log("SESS: ", session);
+
+    return session.url;
+    // return { ok: true };
+  });
 
 // export async function createPaymentIntent({ cartItems}:{cartItems: CreatePaymentIntentInput}) {
 // //   return withRateLimit(async () => {

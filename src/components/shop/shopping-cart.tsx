@@ -36,16 +36,43 @@ export default function ShoppingCart() {
   const { execute, status } = useServerAction(createCheckoutAction, {
     onError({ err }) {
       toast.dismiss();
-      // TODO translate
       toast.error(err.message ?? "Failed to create payment");
     },
 
     onSuccess({ data }) {
-      // TODO translate
-      // toast.info("New socials added");
+      // toast.info("OK");
       router.push(data);
     },
   });
+
+  // const { execute: createPriceExecute, status: createPriceStatus } =
+  //   useServerAction(createPriceAction, {
+  //     onError({ err }) {
+  //       toast.dismiss();
+  //       // TODO translate
+  //       toast.error(err.message ?? "Failed to create prices");
+  //     },
+
+  //     onSuccess({ data }) {
+  //       // TODO translate
+  //       toast.info("Prices Created");
+  //       // router.push(data);
+  //     },
+  //   });
+  // const { execute: listPriceExecute, status: listPriceStatus } =
+  //   useServerAction(listPricesAction, {
+  //     onError({ err }) {
+  //       toast.dismiss();
+  //       // TODO translate
+  //       toast.error(err.message ?? "Failed to list prices");
+  //     },
+
+  //     onSuccess({ data }) {
+  //       // TODO translate
+  //       toast.info("Prices Listed");
+  //       // router.push(data);
+  //     },
+  //   });
 
   return (
     <Sheet>
@@ -139,7 +166,15 @@ export default function ShoppingCart() {
                     size="lg"
                     className="w-full h-12 text-base font-semibold"
                     disabled={status === "pending"}
-                    onClick={() => execute()}
+                    onClick={() =>
+                      execute(
+                        cartItems.map((item) => ({
+                          name: item.name,
+                          priceCent: item.priceCent,
+                          quantity: item.quantity,
+                        }))
+                      )
+                    }
                   >
                     {status === "pending" ? (
                       <Loader2 className="animate-spin" />
@@ -147,6 +182,32 @@ export default function ShoppingCart() {
                       "Checkout"
                     )}
                   </Button>
+
+                  {/* DEV BUTTONS used to create Stripe prices */}
+                  {/* <Button
+                    size="lg"
+                    className="w-full h-12 text-base font-semibold"
+                    disabled={createPriceStatus === "pending"}
+                    onClick={() => createPriceExecute()}
+                  >
+                    {createPriceStatus === "pending" ? (
+                      <Loader2 className="animate-spin" />
+                    ) : (
+                      "Create Prices"
+                    )}
+                  </Button>
+                  <Button
+                    size="lg"
+                    className="w-full h-12 text-base font-semibold"
+                    disabled={listPriceStatus === "pending"}
+                    onClick={() => listPriceExecute()}
+                  >
+                    {listPriceStatus === "pending" ? (
+                      <Loader2 className="animate-spin" />
+                    ) : (
+                      "List Prices"
+                    )}
+                  </Button> */}
                 </div>
               </div>
             </>
