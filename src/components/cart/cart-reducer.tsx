@@ -49,7 +49,7 @@ export default function cartReducer(items: CartItem[], action: CartAction) {
       if (isItemInCart) {
         const newItems = items.map((item) =>
           item.itemId === action.item.itemId
-            ? { ...item, quantity: item.quantity++ }
+            ? { ...item, quantity: item.quantity + 1 }
             : item
         );
         return newItems;
